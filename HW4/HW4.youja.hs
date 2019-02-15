@@ -1,8 +1,12 @@
-cmodule HW3 where
+-- CS 381 Homework #4
+-- Author1 : Jaehyung You
+-- ONID ID: youja
+-- Date : 2019 - 02 - 13
+
+module HW3 where
 
     import MiniMiniLogo
     import Render
-    
     
     --
     -- * Semantics of MiniMiniLogo
@@ -50,7 +54,15 @@ cmodule HW3 where
     --   ((Down,(4,5)),Just ((2,3),(4,5)))
     --
     cmd :: Cmd -> State -> (State, Maybe Line)
-    cmd = undefined
+    -- If s -> up, then s -> up. 
+    -- If s -> down, then s -> down
+    cmd (Pen s) (a,b)                = ((s, b), Nothing)
+
+    -- Down -> Just, and Up -> Nothing
+    cmd (Move x2 y2) (Down, (x1, y1)) = ((Down, (x2, y2)), 
+                                          Just ((x1, y1), (x2, y2)))
+    cmd (Move x2 y2) (Up, (x1, y1))   = ((Up, (x2, y2)),
+                                          Nothing)
     
     
     -- | Semantic function for Prog.
@@ -61,13 +73,22 @@ cmodule HW3 where
     --   >>> prog (steps 2 0 0) start
     --   ((Down,(2,2)),[((0,0),(0,1)),((0,1),(1,1)),((1,1),(1,2)),((1,2),(2,2))])
     prog :: Prog -> State -> (State, [Line])
-    prog = undefined
-    
+    -- It is the base case.
+    prog [] s = (s, []) 
+    -- prog Prog State,
+    -- If Nothing -> it recures with other value in the list
+    -- If Just value -> it recurses with the value as a new list (Using lambda)
+    -- cmd :: Cmd -> State -> (State, Maybe Line)
+    prog (x:xs) s = case (cmd x s) of
+                    (states, Nothing)  -> prog xs states
+                    -- Reference: https://stackoverflow.com/questions/33091532/using-lambda-to-implement-list-function-in-haskell
+                    (states, Just a) -> (\(s, (xs)) -> (s, a:xs)) (prog xs states)
+                    -- -> (State, list xs) -> (State, value will be prepended to the list xs) -> (State , [Line])
     
     --
     -- * Extra credit
     --
-    
+
     -- | This should be a MiniMiniLogo program that draws an amazing picture.
     --   Add as many helper functions as you want.
     amazing :: Prog
