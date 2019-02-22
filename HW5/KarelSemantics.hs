@@ -13,8 +13,16 @@ import KarelState
 
 
 -- | Valuation function for Test.
+-- The Syntax is from karelSyntax.hs
+-- data Test = Not    Test   -- boolean negation
+--           | Facing Card   -- am I facing the given cardinal direction?
+--           | Clear  Dir    -- can I move in the given relative direction?
+--           | Beeper        -- is there a beeper here?
+--           | Empty         -- is my beeper bag empty?
+--   deriving (Eq,Show)
 test :: Test -> World -> Robot -> Bool
-test = undefined
+test (Not a) x y = not (test a x y)
+ 
 
 -- | Valuation function for Stmt.
 stmt :: Stmt -> Defs -> World -> Robot -> Result
