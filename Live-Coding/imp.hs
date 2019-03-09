@@ -128,12 +128,20 @@ module Imp where
     --   typing we would have to check the types in the loop body on each
     --   iteration, whereas with static typing we just check the loop body
     --   once.
-    typeStmt :: Stmt -> Env Type -> Bool
-    typeStmt (Bind v e)   m = undefined
-    typeStmt (If c st se) m = undefined
-    typeStmt (While c sb) m = undefined
-    typeStmt (Block ss)   m = undefined
+
+    -- 
+    typeStmt :: Stmt -> Env Type -> Bool -- Either yes or now, Represent the type error
     
+    typeStmt (Bind v e)   m = case (lookup v m, typeExpr e m) of
+                              (Just tv, Just te) -> tv == te
+                              _ -> False
+    typeStmt (If c st se) m = case typeExpr c m of 
+                              (Just TBool) -> typeStmt st m && typeStmt se m
+                              _ -> False
+    typeStmt (While c sb) m = case typeExpr c m of
+                              (Just TBool) -> typeStmt sb m
+                              _ -> False
+    typeStmt (Block ss)   m = all (\s -> typeStmt s m) ss
     
     -- | Type checking programs. The 'fromList' function is from the
     --   Data.Map module. It builds a map from a list of pairs, thus
