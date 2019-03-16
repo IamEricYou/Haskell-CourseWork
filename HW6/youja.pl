@@ -85,16 +85,34 @@ uncle(X,Y) :- male(X), sibling(X,Z), parent(Z,Y).
 uncle(X,Y) :- male(X), married(X,Z), sibling(Z,W), parent(W,Y).
 
 % 8. Define the predicate `cousin/2`.
-
+cousin(X,Y) :- parent(Z,X), sibling(Z,W), parent(W,Y).
+cousin(X,Y) :- parent(Z,X), married(X,Z), sibling(Z,W), parent(W,Y).
 
 % 9. Define the predicate `ancestor/2`.
-
+ancestor(X,Y) :- parent(X,Y).
+ancestor(X,Y) :- parent(X,Z), ancestor(Z,Y).
 
 % Extra credit: Define the predicate `related/2`.
-
 
 
 %%
 % Part 2. Language implementation (see course web page)
 %%
 
+cmdlit(C) :- number(C).
+cmdlit(C) :- string(C).
+cmdlit(t). % For boolean values
+cmdlit(f). % For boolean values
+
+cmd(C,S1,S2) :-  cmdlit(C), S2 = [C|S1].
+
+cmd(add, [X,Y|Z],S2) :-  W is (X + Y), S2 = [W|Z].
+
+cmd(lte, [X,Y|Z], S2) :-  X =< Y, S2 = [t|Z], !.
+cmd(lte, [X,Y|Z], S2) :-  X > Y, S2 = [f|Z], !.
+
+cmd(if(C,_), [t|S1], S2) :- prog(C,S1,S2).
+cmd(if(_,C), [f|S1], S2) :- prog(C,S1,S2).
+
+prog([], S1, S1).
+prog([C|CL], S1, S2) :- cmd(C, S1, X), prog(CL, X, S2), !.
